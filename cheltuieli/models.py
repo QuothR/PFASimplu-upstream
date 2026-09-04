@@ -21,8 +21,8 @@ class Deductibilitate(models.TextChoices):
         "Obiect de inventar (deductibil integral)"
     )
     DEDUCTIBILA_INTEGRAL_AMORTIZATA = (
-        "Mijloc fix peste 2500 RON (ded. integral cu amortizare)",
-        _("Mijloc fix peste 2500 RON (ded. integral cu amortizare)"),
+        "Mijloc fix peste 5000 RON (ded. integral cu amortizare)",
+        _("Mijloc fix peste 5000 RON (ded. integral cu amortizare)"),
     )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
         "Auto, chirii, utilitati 50% din valoarea lor",

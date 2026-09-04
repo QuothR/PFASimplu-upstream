@@ -549,7 +549,7 @@ function filtreazaCodClasificare(event) {
 function hideShowExtraFieldsForMijlocFix() {
   if (
     select_deductibila_el.value ==
-    "Mijloc fix peste 2500 RON (ded. integral cu amortizare)"
+    "Mijloc fix peste 5000 RON (ded. integral cu amortizare)"
   ) {
     amortizare_el.style.display = "grid";
     display_coduri_clasif_el.style.display = "block";
