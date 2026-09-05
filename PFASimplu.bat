@@ -1,26 +1,25 @@
 @echo off
-title PFASimplu
+title PFASimplu - inchide fereastra ca sa opresti aplicatia
 cd /d "%~dp0"
+set LOG=%~dp0launcher.log
 
-rem Daca serverul ruleaza deja, doar deschide browserul.
-curl -s -o NUL http://127.0.0.1:8000 && goto open
+rem Interpretorul real (cel gestionat de uv), citit din .venv\pyvenv.cfg, si pachetele din .venv.
+rem Nu folosim .venv\Scripts\python.exe (lansatorul mic da eroare cand e pornit din Explorer).
+for /f "tokens=1,* delims== " %%a in ('findstr /b "home" ".venv\pyvenv.cfg"') do set PYHOME=%%b
+set PYTHON=%PYHOME%\python.exe
+set PYTHONPATH=%~dp0.venv\Lib\site-packages
+set VIRTUAL_ENV=%~dp0.venv
 
-echo Pornesc PFASimplu...
-start "PFASimplu - inchide fereastra ca sa opresti aplicatia" ".venv\Scripts\python.exe" manage.py runserver 127.0.0.1:8000 --noreload
+rem Daca serverul ruleaza deja, doar deschide browserul si iesi.
+curl -s -o NUL http://127.0.0.1:8000 && start "" http://127.0.0.1:8000 && exit
 
-rem Asteapta pana cand serverul raspunde (maxim 60 s).
-set /a n=0
-:wait
-set /a n+=1
-if %n% gtr 60 goto fail
-timeout /t 1 >nul
-curl -s -o NUL http://127.0.0.1:8000 && goto open
-goto wait
+echo Pornesc PFASimplu... browserul se deschide cand serverul e gata.
+echo [%date% %time%] pornire cu %PYTHON% > "%LOG%"
+start "" /b cmd /c "%~dp0deschide-browser.cmd"
 
-:open
-start "" http://127.0.0.1:8000
-exit
+"%PYTHON%" manage.py runserver 127.0.0.1:8000 --noreload 2>> "%LOG%"
 
-:fail
-echo Serverul nu a pornit in 60 de secunde. Verifica fereastra "PFASimplu".
+echo.
+echo Serverul s-a oprit (cod %errorlevel%). Detalii in launcher.log:
+type "%LOG%"
 pause
