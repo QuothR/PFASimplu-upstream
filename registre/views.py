@@ -421,7 +421,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     if cheltuieli_d_integral_amortizari:
         cheltuieli_pe_deductibilitate.append(
             {
-                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value,
+                "nume": Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.label,
                 "valoare": round(cheltuieli_d_integral_amortizari, 2),
             }
         )
