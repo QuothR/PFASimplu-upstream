@@ -29,7 +29,7 @@ class Deductibilitate(models.TextChoices):
     )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
         "Auto, chirii, utilitati 50% din valoarea lor",
-        _("Auto, chirii, utilitati 50% din valoarea lor"),
+        _("Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)"),
     )
     DEDUCTIBILA_PARTIAL_SPORT_2024 = (
         "Sport, sali de fitness etc. max. 100 EUR pe an",
@@ -185,6 +185,8 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                 continue
             if month_date > self.data_amortizarii_complete:
                 continue
+            if self.scos_din_uz and self.data_iesirii_din_uz and month_date > self.data_iesirii_din_uz:
+                continue
             if year == today.year and month > today.month:
                 continue
             months += 1
@@ -222,11 +224,19 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return self.suma_in_ron
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
-            clasificare = [
-                c
-                for c in CODURI_CLASIFICARE
-                if c["cod_clasificare"] == self.cod_de_clasificare
-            ][0]
+            if not self.data_punerii_in_functiune:
+                raise ValidationError(
+                    _("Pentru un mijloc fix trebuie completata data punerii in functiune.")
+                )
+            cod = (self.cod_de_clasificare or "").strip()
+            if cod and not cod.endswith("."):
+                cod += "."
+            potriviri = [c for c in CODURI_CLASIFICARE if c["cod_clasificare"] == cod]
+            if not potriviri:
+                raise ValidationError(
+                    _(f"Codul de clasificare '{self.cod_de_clasificare}' nu exista in catalogul mijloacelor fixe (exemplu: 2.2.9.).")
+                )
+            clasificare = potriviri[0]
 
             self.mijloc_fix = True
             self.cod_de_clasificare = clasificare["cod_clasificare"]
@@ -265,20 +275,18 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return round((self.suma_in_ron / 2), 2)  # 50%
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
-            baza_de_calcul_venit_net = get_venit_net(self.data_inserarii.year)
-            suma_admisa_protocol = round(
-                baza_de_calcul_venit_net * 0.02, 2
-            )  # 2% din baza de calcul
-
+            # Art. 68 alin. (6): baza de calcul = venit brut - cheltuieli deductibile, altele
+            # decat cheltuielile de protocol (si bursele private). Se calculeaza pe datele din
+            # anul cheltuielii introduse pana acum; limita e anuala.
             result = CheltuialaModel.objects.filter(
                 deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
                 data_inserarii__year=self.data_inserarii.year,
-            ).aggregate(total_sum=Sum("deducere_in_ron"))
+            ).exclude(pk=self.pk).aggregate(total_sum=Sum("deducere_in_ron"))
+            protocol_deja_dedus = result["total_sum"] or 0
+            baza_de_calcul = get_venit_net(self.data_inserarii.year) + protocol_deja_dedus
+            suma_admisa_protocol = round(baza_de_calcul * 0.02, 2)  # 2% din baza de calcul
 
-            if result["total_sum"] is None:
-                suma_curenta_protocol = self.suma_in_ron
-            else:
-                suma_curenta_protocol = result["total_sum"] + self.suma_in_ron
+            suma_curenta_protocol = protocol_deja_dedus + self.suma_in_ron
 
             if suma_curenta_protocol > suma_admisa_protocol:
                 remaining = round(
@@ -305,7 +313,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             if result_salarii["total_s"] is None:
                 total_salarii = 0
             else:
-                total_salarii = result["total_s"]
+                total_salarii = result_salarii["total_s"]
 
             suma_admisa_sociale = round(total_salarii * 0.05, 2)  # 5% din total salarii
 
