@@ -267,20 +267,18 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return round((self.suma_in_ron / 2), 2)  # 50%
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value:
-            baza_de_calcul_venit_net = get_venit_net(self.data_inserarii.year)
-            suma_admisa_protocol = round(
-                baza_de_calcul_venit_net * 0.02, 2
-            )  # 2% din baza de calcul
-
+            # Art. 68 alin. (6): baza de calcul = venit brut - cheltuieli deductibile, altele
+            # decat cheltuielile de protocol (si bursele private). Se calculeaza pe datele din
+            # anul cheltuielii introduse pana acum; limita e anuala.
             result = CheltuialaModel.objects.filter(
                 deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL.value,
                 data_inserarii__year=self.data_inserarii.year,
-            ).aggregate(total_sum=Sum("deducere_in_ron"))
+            ).exclude(pk=self.pk).aggregate(total_sum=Sum("deducere_in_ron"))
+            protocol_deja_dedus = result["total_sum"] or 0
+            baza_de_calcul = get_venit_net(self.data_inserarii.year) + protocol_deja_dedus
+            suma_admisa_protocol = round(baza_de_calcul * 0.02, 2)  # 2% din baza de calcul
 
-            if result["total_sum"] is None:
-                suma_curenta_protocol = self.suma_in_ron
-            else:
-                suma_curenta_protocol = result["total_sum"] + self.suma_in_ron
+            suma_curenta_protocol = protocol_deja_dedus + self.suma_in_ron
 
             if suma_curenta_protocol > suma_admisa_protocol:
                 remaining = round(
