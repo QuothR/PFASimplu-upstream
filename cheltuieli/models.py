@@ -307,7 +307,7 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             if result_salarii["total_s"] is None:
                 total_salarii = 0
             else:
-                total_salarii = result["total_s"]
+                total_salarii = result_salarii["total_s"]
 
             suma_admisa_sociale = round(total_salarii * 0.05, 2)  # 5% din total salarii
 
