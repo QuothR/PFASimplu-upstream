@@ -185,6 +185,8 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
                 continue
             if month_date > self.data_amortizarii_complete:
                 continue
+            if self.scos_din_uz and self.data_iesirii_din_uz and month_date > self.data_iesirii_din_uz:
+                continue
             if year == today.year and month > today.month:
                 continue
             months += 1
