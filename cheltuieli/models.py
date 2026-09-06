@@ -168,6 +168,25 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
 
         return list(sume_cheltuieli_pe_luni.values())
 
+    def luni_amortizare_in_an(self, year: int) -> int:
+        """Cate luni de amortizare intra in anul dat: lunile dintre data inceperii
+        amortizarii si data amortizarii complete, iar pentru anul curent doar pana
+        in luna de azi inclusiv."""
+        if not self.data_inceperii_amortizarii or not self.data_amortizarii_complete:
+            return 0
+        today = timezone.now().date()
+        months = 0
+        for month in range(1, 13):
+            month_date = datetime.date(year, month, 1)
+            if month_date < self.data_inceperii_amortizarii.replace(day=1):
+                continue
+            if month_date > self.data_amortizarii_complete:
+                continue
+            if year == today.year and month > today.month:
+                continue
+            months += 1
+        return months
+
     @staticmethod
     def get_total_cheltuieli(year: int):
         total_cheltuieli_result = CheltuialaModel.objects.filter(
@@ -181,19 +200,9 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             mijloc_fix=True,
         )
 
-        today = timezone.now()
         total_amortizari = 0
         for row in cheltuieli_mijloc_fix_results:
-            if year == today.year:
-                multiply_months = min(today.month, row.data_amortizarii_complete.month)
-            elif row.data_inceperii_amortizarii.year == year:
-                multiply_months = 12 - (row.data_inceperii_amortizarii.month - 1)
-            elif row.data_amortizarii_complete.year == year:
-                multiply_months = row.data_amortizarii_complete.month
-            else:
-                multiply_months = 12
-            
-            total_amortizari += row.amortizare_lunara * multiply_months
+            total_amortizari += row.amortizare_lunara * row.luni_amortizare_in_an(year)
 
         return round(total_cheltuieli + total_amortizari, 2)
 
