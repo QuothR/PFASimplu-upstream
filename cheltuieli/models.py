@@ -224,11 +224,19 @@ class CheltuialaModel(CommonIncasariCheltuieliModel):
             return self.suma_in_ron
 
         if self.deductibila == Deductibilitate.DEDUCTIBILA_INTEGRAL_AMORTIZATA.value:
-            clasificare = [
-                c
-                for c in CODURI_CLASIFICARE
-                if c["cod_clasificare"] == self.cod_de_clasificare
-            ][0]
+            if not self.data_punerii_in_functiune:
+                raise ValidationError(
+                    _("Pentru un mijloc fix trebuie completata data punerii in functiune.")
+                )
+            cod = (self.cod_de_clasificare or "").strip()
+            if cod and not cod.endswith("."):
+                cod += "."
+            potriviri = [c for c in CODURI_CLASIFICARE if c["cod_clasificare"] == cod]
+            if not potriviri:
+                raise ValidationError(
+                    _(f"Codul de clasificare '{self.cod_de_clasificare}' nu exista in catalogul mijloacelor fixe (exemplu: 2.2.9.).")
+                )
+            clasificare = potriviri[0]
 
             self.mijloc_fix = True
             self.cod_de_clasificare = clasificare["cod_clasificare"]

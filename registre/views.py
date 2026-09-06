@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 import matplotlib
 import pandas as pd
+from django.contrib import messages
 from django.db.models import Q, Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -144,6 +145,9 @@ class RegistruInventarDescarcaView(View):
     def get(self, request):
         filetype = request.GET.get("filetype").lower()
         data = get_registru_inventar(dbid=True)
+        if not data:
+            messages.add_message(request, messages.ERROR, "Registrul-inventar este gol, nu exista nimic de exportat.", extra_tags="🟥 Eroare!")
+            return redirect("/registre/")
 
         src_filepaths = []
         for item in data:
