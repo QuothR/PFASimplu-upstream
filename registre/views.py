@@ -415,16 +415,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_amortizari = 0
     if amortizari:
         for amortizare in amortizari:
-            if anul > amortizare.anul_amortizarii_complete or anul < amortizare.data_inceperii_amortizarii.year:
-                continue
-            
-            months = 12
-            if amortizare.data_inceperii_amortizarii.year == anul:
-                months = 12 - amortizare.data_inceperii_amortizarii.month
-
-            if amortizare.data_amortizarii_complete.year == anul:
-                months = amortizare.data_amortizarii_complete.month
-
+            months = amortizare.luni_amortizare_in_an(anul)
             cheltuieli_d_integral_amortizari += months * amortizare.amortizare_lunara
 
     if cheltuieli_d_integral_amortizari:
