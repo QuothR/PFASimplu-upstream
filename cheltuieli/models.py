@@ -20,8 +20,11 @@ class Deductibilitate(models.TextChoices):
     DEDUCTIBILA_INTEGRAL_INVENTAR = "Obiect de inventar (deductibil integral)", _(
         "Obiect de inventar (deductibil integral)"
     )
+    # Valoarea salvata in baza de date ramane cea veche (cu "2500"), ca sa nu se strice
+    # inregistrarile existente. Doar eticheta afisata arata pragul actual de 5000 RON
+    # (OUG 8/2026, de la 1 ianuarie 2026).
     DEDUCTIBILA_INTEGRAL_AMORTIZATA = (
-        "Mijloc fix peste 5000 RON (ded. integral cu amortizare)",
+        "Mijloc fix peste 2500 RON (ded. integral cu amortizare)",
         _("Mijloc fix peste 5000 RON (ded. integral cu amortizare)"),
     )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
