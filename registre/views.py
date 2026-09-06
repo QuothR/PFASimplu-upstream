@@ -364,13 +364,15 @@ def get_incasari_pe_surse(anul: int):
 
 
 def get_cheltuieli_pe_deductibilitate(anul: int):
+    # Registrul fiscal arata sumele DEDUSE (deducere_in_ron), nu sumele platite, ca liniile
+    # sa se adune la "Total cheltuieli" (care e calculat tot pe deducere_in_ron).
 
     cheltuieli_pe_deductibilitate = []
 
     cheltuieli_d_integral = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL, data_inserarii__year=anul
     )
-    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("suma_in_ron"))["total"]
+    cheltuieli_d_integral = cheltuieli_d_integral.aggregate(total=Sum("deducere_in_ron"))["total"]
 
     if cheltuieli_d_integral:
         cheltuieli_pe_deductibilitate.append(
@@ -383,7 +385,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_inventar = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_INVENTAR,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_integral_inventar = cheltuieli_d_integral_inventar["total"]
 
     if cheltuieli_d_integral_inventar:
@@ -397,7 +399,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_integral_salarii = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_INTEGRAL_SALARII,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_integral_salarii = cheltuieli_d_integral_salarii["total"]
 
     if cheltuieli_d_integral_salarii:
@@ -429,7 +431,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_auto_casa_utilizati = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_auto_casa_utilizati = cheltuieli_d_partial_auto_casa_utilizati[
         "total"
     ]
@@ -445,7 +447,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_sport_2024 = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SPORT_2024,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_sport_2024 = cheltuieli_d_partial_sport_2024["total"]
 
     if cheltuieli_d_partial_sport_2024:
@@ -459,7 +461,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_pensie_p3 = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PENSIE_PILON_3,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_pensie_p3 = cheltuieli_d_partial_pensie_p3["total"]
 
     if cheltuieli_d_partial_pensie_p3:
@@ -473,7 +475,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_asig_medicale = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_ASIG_MEDICALE_PRIVAT,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_asig_medicale = cheltuieli_d_partial_asig_medicale["total"]
 
     if cheltuieli_d_partial_asig_medicale:
@@ -487,7 +489,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_protocol = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_PROTOCOL,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_protocol = cheltuieli_d_partial_protocol["total"]
 
     if cheltuieli_d_partial_protocol:
@@ -501,7 +503,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_sociale = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_SOCIALE,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_sociale = cheltuieli_d_partial_sociale["total"]
 
     if cheltuieli_d_partial_sociale:
@@ -515,7 +517,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_contrib_obligatorii = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_CONTRIBUTII_OBLIGATORII_ASOC_ORG,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_contrib_obligatorii = cheltuieli_d_partial_contrib_obligatorii[
         "total"
     ]
@@ -531,7 +533,7 @@ def get_cheltuieli_pe_deductibilitate(anul: int):
     cheltuieli_d_partial_cotizatii_voluntare = CheltuialaModel.objects.filter(
         deductibila=Deductibilitate.DEDUCTIBILA_PARTIAL_COTIZATII_VOLUNTARE_ASOC_ORG,
         data_inserarii__year=anul,
-    ).aggregate(total=Sum("suma_in_ron"))
+    ).aggregate(total=Sum("deducere_in_ron"))
     cheltuieli_d_partial_cotizatii_voluntare = cheltuieli_d_partial_cotizatii_voluntare[
         "total"
     ]
@@ -696,7 +698,7 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": "Incasare",
+                    "felul_operatiunii": "Incasare" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
                     "incasari_numerar": incasari_numerar,
                     "incasari_banca": incasari_bancar,
                     "plati_numerar": 0,
@@ -718,7 +720,7 @@ def get_registru_jurnal_incasari_si_plati(request, incasari=None, cheltuieli=Non
                     "data": entry.data_inserarii.isoformat(),
                     "documentul": entry.fisier,
                     "documentId": str(entry.fisier).split("_")[0],
-                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}",
+                    "felul_operatiunii": f"Cheltuiala {entry.nume_cheltuiala}" + (f" ({entry.suma} {entry.valuta})" if entry.valuta != "RON" else ""),
                     "incasari_numerar": 0,
                     "incasari_banca": 0,
                     "plati_numerar": cheltuieli_numerar,
