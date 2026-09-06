@@ -29,7 +29,7 @@ class Deductibilitate(models.TextChoices):
     )
     DEDUCTIBILA_PARTIAL_AUTO_CASA_UTILITATI = (
         "Auto, chirii, utilitati 50% din valoarea lor",
-        _("Auto, chirii, utilitati 50% din valoarea lor"),
+        _("Vehicule nefolosite exclusiv in activitate, 50% (art. 68 alin. 7 lit. k)"),
     )
     DEDUCTIBILA_PARTIAL_SPORT_2024 = (
         "Sport, sali de fitness etc. max. 100 EUR pe an",

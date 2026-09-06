@@ -772,10 +772,9 @@ def get_cards_and_charts_data(request):
             print("0 total cheltuieli", err)
             total_cheltuieli = 0
 
+        # Venitul net poate fi negativ (pierdere fiscala); se afiseaza ca atare in registrul
+        # fiscal, iar taxele se calculeaza pe baza pozitiva.
         total_incasari_net = round((total_incasari_brut - total_cheltuieli), 2)
-
-        if total_incasari_net <= 0:
-            total_incasari_net = 0
 
         cheltuieli = CheltuialaModel.objects.all()
         if cheltuieli:
@@ -834,14 +833,14 @@ def get_cards_and_charts_data(request):
 
     if furnizor:
         la_stat = calculeaza_taxe_si_impozite(
-            total_incasari_net,
+            max(total_incasari_net, 0),
             anul,
             furnizor.scutit_cas,
             furnizor.scutit_cass,
             furnizor.scutit_impozit,
         )
     else:
-        la_stat = calculeaza_taxe_si_impozite(total_incasari_net, anul)
+        la_stat = calculeaza_taxe_si_impozite(max(total_incasari_net, 0), anul)
 
     total_platite_la_stat_pe_toti_anii = DocumenteModel.total_plati_la_stat()
 
@@ -859,7 +858,7 @@ def get_cards_and_charts_data(request):
         
         if furnizor:
             tiy = calculeaza_taxe_si_impozite(
-                incasari_net,
+                max(incasari_net, 0),
                 yr,
                 furnizor.scutit_cas,
                 furnizor.scutit_cass,
@@ -867,7 +866,7 @@ def get_cards_and_charts_data(request):
             )["total_taxe_impozite"]
         else:
             tiy = calculeaza_taxe_si_impozite(
-                incasari_net,
+                max(incasari_net, 0),
                 yr,
             )["total_taxe_impozite"]
 
@@ -884,8 +883,9 @@ def get_cards_and_charts_data(request):
 
     total_incasari_net_pe_toti_anii = round(total_incasari_net_pe_toti_anii, 2)
 
+    # Pozitiv = mai e de platit; negativ = platit in plus fata de estimare.
     rest_de_plata_catre_stat = round(
-        abs(total_platite_la_stat_pe_toti_anii - total_de_platit_la_stat_pe_toti_anii),
+        total_de_platit_la_stat_pe_toti_anii - total_platite_la_stat_pe_toti_anii,
         2,
     )
 
